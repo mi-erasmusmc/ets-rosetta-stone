@@ -42,7 +42,7 @@ the application.yml (or set it as environment variable)
 
 #### UI
 
-There is a UI available for end users to view translation between terminologies here
+There is a UI available for end users to view translation between terminologies [here](https://github.com/mi-erasmusmc/ets-rosetta-stone-ui)
 
 #### Docker
 
