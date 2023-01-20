@@ -1,0 +1,54 @@
+spring:
+  jackson:
+    default-property-inclusion: NON_DEFAULT
+    visibility:
+      field: any
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+  datasource:
+    username: "root"
+    password: "test123"
+    url: "jdbc:mysql://localhost:3306/cdmv5"
+  jpa:
+    show-sql: false # Set to true for debugging queries
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: "org.hibernate.dialect.MySQLDialect"
+    open-in-view: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+  cache:
+    #    type: NONE  # Disable external cache
+    type: REDIS # Enable cache
+server:
+  port: 8081
+  error:
+    include-message: always
+  tomcat:
+    relaxed-query-chars: '[,]'
+  servlet:
+    context-path: "/v2"
+  forward-headers-strategy: framework
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    redis:
+      enabled: true # Set to true when cache is enabled
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+auth:
+  enabled: true # Enable or disable authentication
+# Keycloack url for if auth is enabled
+toxhub:
+  auth:
+    url: "https://login.dev.toxhub.etransafe.eu/auth/realms/KH/protocol/openid-connect"

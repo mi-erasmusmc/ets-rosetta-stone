@@ -1,0 +1,8 @@
+*.xlsx
+/target
+/.idea
+.DS_Store
+*/.DS_Store
+Makefile
+/k8
+.dcignore
