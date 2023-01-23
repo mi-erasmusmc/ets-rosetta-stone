@@ -44,6 +44,8 @@ class SironaServiceTest {
     @Test
     void testMeddraToETox() {
         var request = List.of(
+                new ToxHubFinding().finding("Chronic hepatitis B"),
+                new ToxHubFinding().finding("Hepatic steatosis"),
                 new ToxHubFinding().finding("Nephrocalcinosis"),
                 new ToxHubFinding().finding("Thrombocytopenia"),
                 new ToxHubFinding().finding("Haemorrhage"),

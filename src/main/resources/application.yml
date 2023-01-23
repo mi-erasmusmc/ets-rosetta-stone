@@ -21,8 +21,8 @@ spring:
       repositories:
         enabled: false
   cache:
-    #    type: NONE  # Disable external cache
-    type: REDIS # Enable cache
+        type: NONE  # Disable external cache
+#    type: REDIS # Enable cache
 server:
   port: 8081
   error:
@@ -39,7 +39,7 @@ management:
         enabled: true
   health:
     redis:
-      enabled: true # Set to true when cache is enabled
+      enabled: false # Set to true when cache is enabled
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
@@ -47,7 +47,7 @@ springdoc:
     operations-sorter: alpha
 
 auth:
-  enabled: true # Enable or disable authentication
+  enabled: false # Enable or disable authentication
 # Keycloack url for if auth is enabled
 toxhub:
   auth:

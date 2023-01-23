@@ -107,32 +107,33 @@ public class SironaService {
 
 
     private List<Mapping> sortAndFilter(Collection<Mapping> maps, int maxPenalty) {
-        final Predicate<Mapping> underThreeItems = m -> m.to().stream().findAny().orElse(new MappingItem(emptySet())).size() < 3;
         var mappings = maps.stream()
+                .filter(m -> !m.to().stream().allMatch(mi -> mi.size() > 2))
                 // At present +0.4 is a feature not a bug ;-)
-                .filter(m -> m.totalPenalty() < (maxPenalty + 0.4) && m.totalPenalty() > (-maxPenalty - 1))
+                .filter(m -> m.totalPenalty() <= (maxPenalty + 0.4) && m.totalPenalty() >= (-maxPenalty - 1))
                 .sorted(Comparator.comparing(m -> Math.abs(m.totalPenalty())))
                 .toList();
-        boolean hasPositives = mappings.stream()
-                .filter(m -> m.to() != null)
-                .filter(underThreeItems)
-                .anyMatch(m -> m.totalPenalty() >= 0);
-        double minScore = mappings.stream()
-                .filter(m -> m.to() != null)
-                .filter(underThreeItems)
-                .filter(m -> m.totalPenalty() >= 0)
-                .mapToDouble(Mapping::totalPenalty)
-                .min().orElse(0);
-        double maxScore = mappings.stream()
-                .filter(m -> m.to() != null)
-                .filter(underThreeItems)
-                .filter(m -> m.totalPenalty() <= 0)
-                .mapToDouble(Mapping::totalPenalty)
-                .max().orElse(0);
-        double best = hasPositives ? minScore : maxScore;
+        double best;
+        if (mappings.stream().anyMatch(m -> m.totalPenalty() == 0.0)) {
+            best = 0;
+        } else {
+            boolean hasPositives = mappings.stream()
+                    .filter(m -> m.to() != null)
+                    .anyMatch(m -> m.totalPenalty() >= 0);
+            double minScore = mappings.stream()
+                    .filter(m -> m.to() != null)
+                    .filter(m -> m.totalPenalty() >= 0)
+                    .mapToDouble(Mapping::totalPenalty)
+                    .reduce(Double::min).orElse(0);
+            double maxScore = mappings.stream()
+                    .filter(m -> m.to() != null)
+                    .filter(m -> m.totalPenalty() <= 0)
+                    .mapToDouble(Mapping::totalPenalty)
+                    .max().orElse(0);
+            best = hasPositives ? minScore : maxScore;
+        }
         return mappings.stream()
                 .filter(m -> m.to() != null)
-                .filter(underThreeItems)
                 .sorted(Comparator.comparing(m -> Math.abs(m.totalPenalty())))
                 .filter(m -> m.totalPenalty() == best)
                 .toList();

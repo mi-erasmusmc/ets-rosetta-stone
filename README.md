@@ -10,7 +10,7 @@ project**
 
 - [Java 17+]("https://www.oracle.com/java/technologies/downloads/")
 - Maven
-- MySQL with the eTransafe Rosetta Stone database, can be done
+- MySQL with the eTransafe Rosetta Stone database, can be created
   with [this code](https://github.com/mi-erasmusmc/ets-rosetta-stone-database)
 
 ### HOW TO USE
@@ -42,7 +42,8 @@ the application.yml (or set it as environment variable)
 
 #### UI
 
-There is a UI available for end users to view translation between terminologies [here](https://github.com/mi-erasmusmc/ets-rosetta-stone-ui)
+There is a UI available for end users to view translation between
+terminologies [here](https://github.com/mi-erasmusmc/ets-rosetta-stone-ui)
 
 #### Docker
 

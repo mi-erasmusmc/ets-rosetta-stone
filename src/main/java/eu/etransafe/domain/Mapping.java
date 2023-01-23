@@ -57,7 +57,7 @@ public class Mapping implements Serializable {
     public String explanationString() {
         return "\nRESULT:\n" +
                 (to == null ? "No mapping" : to.stream().map(MappingItem::humanReadable).collect(JOINING_OR)) +
-                (totalPenalty() != 0 ? "\nTotal penalty: " + totalPenalty() : "") +
+                "\nTotal penalty: " + totalPenalty() +
                 "\nStep: " +
                 description +
                 (penalty != 0 ? (" (penalty: " + penalty) + ")" : "") +
