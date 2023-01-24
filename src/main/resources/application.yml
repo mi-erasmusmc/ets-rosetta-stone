@@ -22,7 +22,7 @@ spring:
         enabled: false
   cache:
         type: NONE  # Disable external cache
-#    type: REDIS # Enable cache
+#    type: REDIS # Enable cache also enable health redis below
 server:
   port: 8081
   error:
@@ -48,7 +48,7 @@ springdoc:
 
 auth:
   enabled: false # Enable or disable authentication
-# Keycloack url for if auth is enabled
+# Keycloak url for if auth is enabled
 toxhub:
   auth:
     url: "https://login.dev.toxhub.etransafe.eu/auth/realms/KH/protocol/openid-connect"

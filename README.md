@@ -4,20 +4,20 @@ eTransafe Rosetta Stone
 **The eTransafe Rosetta Stone is a Spring Boot application that exposes API endpoints for the translation between
 clinical and preclinical terminologies, normalization and lookup of terms, as well as hierarchical expansions of
 concepts. It was developed at the Erasmus Medical Centre department of Medical Informatics as part of the eTransafe
-project**
+project.**
 
 ### REQUIREMENTS
 
-- [Java 17+]("https://www.oracle.com/java/technologies/downloads/")
-- Maven
-- MySQL with the eTransafe Rosetta Stone database, can be created
+- The eTransafe Rosetta Stone database, it can be created
   with [this code](https://github.com/mi-erasmusmc/ets-rosetta-stone-database)
+- [Java 17+]("https://www.oracle.com/java/technologies/downloads/")
+- Maven 3.8
 
 ### HOW TO USE
 
 - Make sure you have the eTransafe Rosetta Stone database up and running
-- Configure your database settings in the application.yml in the ./src/main/resources folder or set the relevant
-  properties as environment variables
+- Configure your database settings in the application.yml in the ./src/main/resources folder under spring.datasource or
+  set the relevant properties as environment variables
 - Run `mvn spring-boot:run`
 - When the app is running the API docs are exposed at http://localhost:8081/v2/swagger-ui/index.html#/
 
