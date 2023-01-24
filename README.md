@@ -6,6 +6,10 @@ clinical and preclinical terminologies, normalization and lookup of terms, as we
 concepts. It was developed at the Erasmus Medical Centre department of Medical Informatics as part of the eTransafe
 project.**
 
+- An online version of the eTransafe Rosetta Stone can be accessed [here](https://emc-mi-notebooks.nl/rosettastone.kh.svc/)
+- API documentation is available [here](https://emc-mi-notebooks.nl/semanticservice.kh.svc/v2/swagger-ui/index.html#/)
+
+
 ### REQUIREMENTS
 
 - The eTransafe Rosetta Stone database, it can be created
