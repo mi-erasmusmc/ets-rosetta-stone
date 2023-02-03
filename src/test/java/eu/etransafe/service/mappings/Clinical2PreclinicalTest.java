@@ -99,5 +99,13 @@ class Clinical2PreclinicalTest {
         assertTrue(bestMappings.stream().anyMatch(m -> m.toConcepts().size() == 3));
     }
 
+    @Test
+    void mapPotentialEternalMapping3() {
+        var c = conceptService.byCode("10065988", CLINICAL);
+        Set<Mapping> res = clinical2Preclinical.map(c, SEND, true, 2);
+        res.stream().sorted(Comparator.comparing((Mapping m) -> Math.abs(m.totalPenalty()))).forEach(r -> System.out.println(r.explanationString()));
+    }
+    
+
 
 }

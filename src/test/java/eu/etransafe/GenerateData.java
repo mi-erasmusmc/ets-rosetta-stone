@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +31,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static eu.etransafe.domain.Vocabularies.ETOX;
-import static eu.etransafe.domain.Vocabularies.SEND;
 import static org.apache.commons.lang3.SystemUtils.USER_DIR;
 
 
@@ -57,11 +55,9 @@ class GenerateData {
     @Test
     @Disabled
     void createFileWithSnomedOrgansForAllPts() {
-        var pts = pts();
-
         File file = new File("pt2snomed.tsv");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            pts.forEach(c -> {
+            pts().forEach(c -> {
                 var res = organs.fromPT(c);
                 res.forEach(r -> r.to().forEach(t -> t.concepts().forEach(o -> {
                     try {
@@ -81,10 +77,10 @@ class GenerateData {
     @Test
     @Disabled
     void createFileWithAllSOCsForMouseAnatomyOrgans() {
-        var pts = conceptService.byVocabularyAndDomain(Vocabulary.Identifier.MA, Domain.SPEC_ANATOMIC_SITE, false);
+        var organs = conceptService.byVocabularyAndDomain(Vocabulary.Identifier.MA, Domain.SPEC_ANATOMIC_SITE, false);
         File file = new File("ma2soc.tsv");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            pts.forEach(c -> {
+            organs.forEach(c -> {
                 var res = meddraService.mouseAnatomyToSystemOrganClass(c, 3);
                 if (res.isEmpty()) {
                     System.out.println(c);
@@ -117,7 +113,7 @@ class GenerateData {
         var target = ETOX; // SEND;
         var fileName = "pt2send.tsv";
         // In case we stopped half way and don't want to restart from scratch
-        boolean skipAlreadyDone = false;
+        boolean skipAlreadyDone = true;
         Set<String> alreadyDone = new HashSet<>();
 
         if (skipAlreadyDone) {
@@ -135,11 +131,9 @@ class GenerateData {
         }
 
         AtomicInteger counter = new AtomicInteger();
-        var pts = pts();
-        Collections.shuffle(pts);
         File file = new File(fileName);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            pts.stream().forEach(c -> {
+            pts().forEach(c -> {
                 System.out.println(counter.getAndIncrement() + " " + c.string());
                 if (!alreadyDone.contains(c.name())) {
                     var res = clinical2Preclinical.map(c, target, false, 2);
