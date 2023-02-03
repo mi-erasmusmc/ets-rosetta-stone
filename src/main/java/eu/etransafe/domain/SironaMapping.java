@@ -52,9 +52,9 @@ public record SironaMapping(ToxHubFinding from, List<ToxHubFinding> to) implemen
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
-        
+
         var shouldRemoveSingle = to.stream().anyMatch(t -> t.finding != null && t.organ != null);
-        
+
         if (shouldRemoveSingle) {
             var pairs = to.stream().filter(t -> t.finding != null && t.organ != null).toList();
             return new SironaMapping(from, pairs);

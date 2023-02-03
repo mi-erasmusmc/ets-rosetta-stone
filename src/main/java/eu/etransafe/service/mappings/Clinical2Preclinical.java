@@ -2,6 +2,7 @@ package eu.etransafe.service.mappings;
 
 import com.google.common.collect.Sets;
 import eu.etransafe.domain.Concept;
+import eu.etransafe.domain.Domain;
 import eu.etransafe.domain.Mapping;
 import eu.etransafe.domain.MappingItem;
 import eu.etransafe.domain.Vocabulary;
@@ -22,7 +23,6 @@ import java.util.stream.Collectors;
 import static eu.etransafe.domain.Mapping.DESCR_TO_SINGLE_OR;
 import static eu.etransafe.domain.Mapping.Direction.DOWNHILL;
 import static eu.etransafe.domain.Mapping.Direction.UPHILL;
-import static eu.etransafe.service.mappings.MappingService.BODY_STRUCTURES;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.groupingBy;
@@ -33,9 +33,11 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @Slf4j
 public class Clinical2Preclinical {
 
+    public static final Set<Concept> DO_NOT_EXPAND = Set.of(new Concept().id(40481827), new Concept().id(4034052), new Concept().id(4237366), new Concept().id(70002975), new Concept().id(70000004), new Concept().id(4175951));
     private final ConceptService conceptService;
     private final MappingService mappingService;
     private final MappingCache mappingCache;
+
 
     public Clinical2Preclinical(ConceptService conceptService, MappingService mappingService, MappingCache mappingCache) {
         this.conceptService = conceptService;
@@ -48,7 +50,7 @@ public class Clinical2Preclinical {
             log.error("Provided concept was null mapping clinical to preclinical");
             return emptySet();
         }
-        log.info("Mapping {} [{}] to {}. maxPenalty: {}", source.name(), source.code(), targetVocabularies, maxPenalty);
+        log.debug("Mapping {} [{}] to {}. maxPenalty: {}", source.name(), source.code(), targetVocabularies, maxPenalty);
         List<Mapping> mappingsToSnomed = toSnomed(source);
         if (mappingsToSnomed.isEmpty()) {
             return Set.of(Mapping.noMapping(source));
@@ -56,6 +58,7 @@ public class Clinical2Preclinical {
 
         Set<Mapping> result = new HashSet<>();
         Map<Set<Concept>, Double> alreadyDone = new HashMap<>();
+
 
         mappingsToSnomed.stream()
                 .map(snomed -> mapSnomedToPreclinical(targetVocabularies, snomed, maxPenalty, alreadyDone))
@@ -68,6 +71,7 @@ public class Clinical2Preclinical {
                 .filter(Objects::nonNull)
                 .map(this::removeNulls)
                 .filter(m -> m.to() != null && !m.to().stream().allMatch(Objects::isNull))
+                .map(this::negativelyScoreOnlyOrgans)
                 .collect(Collectors.groupingBy(Mapping::to))
                 .forEach((to, maps) -> {
                     var winner = mappingService.findOneBestMapping(maps);
@@ -84,6 +88,15 @@ public class Clinical2Preclinical {
             return Set.of(deadEnd);
         }
         return explain ? result : mappingService.squash(source, result);
+    }
+
+    private Mapping negativelyScoreOnlyOrgans(Mapping mapping) {
+        boolean shouldBeNegative = mapping.toConcepts().stream().allMatch(c -> c.domain().equals(Domain.SPEC_ANATOMIC_SITE));
+        if (shouldBeNegative) {
+            double negative = -mapping.penalty() - 1;
+            mapping.penalty(negative);
+        }
+        return mapping;
     }
 
     // I don't know where these nulls are coming from, but they are wrecking havock in the UI
@@ -167,6 +180,7 @@ public class Clinical2Preclinical {
 
     private Set<Mapping> mapSnomedToPreclinical(Set<Vocabulary.Identifier> targetVocabularies, Mapping mappingToSnomed,
                                                 int maxPenalty, Map<Set<Concept>, Double> alreadyDone) {
+        log.debug("Mapping {}", mappingToSnomed.toConcepts().stream().map(Concept::string).collect(Collectors.joining(", ")));
         Set<Mapping> result = new HashSet<>();
         if (mappingToSnomed.totalPenalty() > maxPenalty) {
             return result;
@@ -185,8 +199,11 @@ public class Clinical2Preclinical {
 
             split.forEach(m -> {
                 if (m.totalPenalty() < maxPenalty) {
-                    var expMaps = expandAndMap(m, new HashSet<>(), null, maxPenalty, targetVocabularies, alreadyDone);
-                    result.addAll(expMaps);
+                    // If we already have results and there are lots of concepts, we will skip expansion it can get a bit crazy with things like CLOVE syndrome (3 morph + 4 finding sites with many children)
+                    if (!(result.size() > 5 && m.toConcepts().size() > 5)) {
+                        var expMaps = expandAndMap(m, new HashSet<>(), null, maxPenalty, targetVocabularies, alreadyDone);
+                        result.addAll(expMaps);
+                    }
                 }
             });
         }
@@ -202,6 +219,7 @@ public class Clinical2Preclinical {
             Set<Concept> mappableSnomed = new HashSet<>(snomedConceptsGroupedByMappedOrNot.getOrDefault(true, emptyList()));
             if (!mappableSnomed.isEmpty() && (alreadyDone.get(mappableSnomed) == null || alreadyDone.get(mappableSnomed) > s.totalPenalty())) {
                 alreadyDone.put(mappableSnomed, s.totalPenalty());
+                log.debug("Concepts in SNOMED split {}", s.toConcepts().stream().map(Concept::string).collect(Collectors.joining(", ")));
 
                 // Only makes sense if we have the original set completely mappable
                 if (removedItems.isEmpty()) {
@@ -219,6 +237,7 @@ public class Clinical2Preclinical {
                         var mergers = merge(p, preceding);
                         mappings.addAll(mergers);
                     });
+                    log.debug("mappableSnomed size {}", mappableSnomed.size());
                     List<List<Mapping>> individualConceptMappings = mappingCache.singleConcepts(mappableSnomed, preceding, vocabularies);
                     log.debug("Mapped {} individual SNOMED concepts to individual preclinical terms", individualConceptMappings.size());
 
@@ -292,6 +311,7 @@ public class Clinical2Preclinical {
     private Set<Mapping> expandAndMap(Mapping mapping, Set<Concept> exclude, Mapping.Direction direction,
                                       int maxPenalty,
                                       Set<Vocabulary.Identifier> targetVocabulary, Map<Set<Concept>, Double> alreadyDone) {
+        log.debug("Expand and map {}", mapping.toConcepts().stream().map(Concept::string).collect(Collectors.joining(", ")));
         Set<Mapping> mappings = new HashSet<>();
         if (mapping.totalPenalty() < maxPenalty) {
             splitOrToSingleMapping(mapping)
@@ -299,13 +319,15 @@ public class Clinical2Preclinical {
                             .forEach(snomed -> {
                                 if (!(DOWNHILL.equals(direction) && exclude.contains(snomed))) {
                                     var parents = conceptService.parents(snomed);
-                                    if (parents.stream().noneMatch(BODY_STRUCTURES::contains)) {
+                                    if (parents.stream().noneMatch(DO_NOT_EXPAND::contains)) {
                                         mappings.addAll(mapExpansion(m, snomed, parents, UPHILL, maxPenalty, targetVocabulary, alreadyDone, exclude));
                                     }
                                 }
                                 if (!(UPHILL.equals(direction) && exclude.contains(snomed))) {
-                                    var children = conceptService.children(snomed);
-                                    mappings.addAll(mapExpansion(m, snomed, children, DOWNHILL, maxPenalty, targetVocabulary, alreadyDone, exclude));
+                                    if (!DO_NOT_EXPAND.contains(snomed)) {
+                                        var children = conceptService.children(snomed);
+                                        mappings.addAll(mapExpansion(m, snomed, children, DOWNHILL, maxPenalty, targetVocabulary, alreadyDone, exclude));
+                                    }
                                 }
                             }));
         }
@@ -315,14 +337,15 @@ public class Clinical2Preclinical {
     private Set<Mapping> mapExpansion(Mapping input, Concept expandedConcept, List<Concept> relatives,
                                       Mapping.Direction direction, int maxPenalty, Set<Vocabulary.Identifier> targetVoc,
                                       Map<Set<Concept>, Double> alreadyDone, Set<Concept> exclude) {
+        log.debug("Map expansion of {}", expandedConcept.string());
         Set<Mapping> result = new HashSet<>();
         relatives.forEach(p -> {
             Mapping expanded = createHierarchicTraversalMappingItem(input, expandedConcept, p, direction);
             if (mappingCache.isMappedToPreclinical(p, targetVoc)) {
                 var mappings = snomedPartsToPreclinical(Set.of(expanded), targetVoc, alreadyDone);
                 result.addAll(mappings);
-            }
-            if (expanded.totalPenalty() < maxPenalty) {
+            }                                           // If we have already checked 120 expanded terms we will stop expanding, arbitrary number, it has been enough.
+            if (expanded.totalPenalty() < maxPenalty && exclude.size() < 120) {
                 exclude.add(p);
                 var expandedMappings = expandAndMap(expanded, exclude, direction, maxPenalty, targetVoc, alreadyDone);
                 result.addAll(expandedMappings);

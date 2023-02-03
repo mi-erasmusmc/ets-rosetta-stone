@@ -73,7 +73,8 @@ public class MappingCache {
                                 var repeat = snomedToETOXPartialMap.getOrDefault(part.conceptOne().code(), new ArrayList<>());
                                 repeat.add(mappings.stream().map(ConceptRelationship::conceptOne).map(Concept::code).toList());
                                 snomedToETOXPartialMap.put(part.conceptOne().code(), repeat);
-                            } else if (items.concepts().stream().anyMatch(c -> SEND.contains(c.vocabulary()))) {
+                            }
+                            if (items.concepts().stream().anyMatch(c -> SEND.contains(c.vocabulary()))) {
                                 var repeat = snomedToSENDPartialMap.getOrDefault(part.conceptOne().code(), new ArrayList<>());
                                 repeat.add(mappings.stream().map(ConceptRelationship::conceptOne).map(Concept::code).toList());
                                 snomedToSENDPartialMap.put(part.conceptOne().code(), repeat);
@@ -234,10 +235,6 @@ public class MappingCache {
                                             .description(c.name() + " " + m.predicate().value() + " to " + m.items().humanReadableSimple() + " neglecting " + deviation + " terms")
                                             .penalty((!m.predicate().equals(ConceptRelationship.Identifier.EXACT) ? 0.1 : 0) + deviation))
                             .toList());
-
-                    if (misses != null) {
-                        one.addAll(singleConcepts(misses, preceding, vocabularies));
-                    }
                     result.add(one);
                 });
             }

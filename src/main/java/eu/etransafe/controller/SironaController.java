@@ -43,7 +43,7 @@ public class SironaController {
                 .filter(s -> s.to() != null && !s.to().isEmpty())
                 .toList();
         var duration = System.currentTimeMillis() - start;
-        log.info("Translated {} histopathology concepts for Sirona in {} millis", request.findings().size(), duration);
+        log.debug("Translated {} histopathology concepts for Sirona in {} millis", request.findings().size(), duration);
         return resp;
     }
 
@@ -52,7 +52,7 @@ public class SironaController {
     public List<SironaMapping> getCC2MeddraMapping(@RequestBody SironaRequest request) {
         return request.findings().stream()
                 .distinct()
-                .map(f -> sironaService.clinicalFromClinicalChemistry(f, "blood"))
+                .map(f -> sironaService.clinicalFromLab(f, "blood"))
                 .filter(Objects::nonNull)
                 .filter(s -> s.to() != null && !s.to().isEmpty())
                 .toList();
@@ -63,7 +63,7 @@ public class SironaController {
     public List<SironaMapping> getUrinalysis2MeddraMapping(@RequestBody SironaRequest request) {
         return request.findings().stream()
                 .distinct()
-                .map(f -> sironaService.clinicalFromClinicalChemistry(f, "urine"))
+                .map(f -> sironaService.clinicalFromLab(f, "urine"))
                 .filter(Objects::nonNull)
                 .filter(s -> s.to() != null && !s.to().isEmpty())
                 .toList();

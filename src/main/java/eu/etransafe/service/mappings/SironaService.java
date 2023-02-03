@@ -17,17 +17,14 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static eu.etransafe.domain.Domain.MEASUREMENT;
-import static eu.etransafe.domain.Domain.OBSERVATION;
+import static eu.etransafe.domain.Vocabularies.ETOX;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 
 @Service
 public class SironaService {
@@ -51,28 +48,33 @@ public class SironaService {
     }
 
     @Cacheable(value = "sironaFromLab")
-    public SironaMapping clinicalFromClinicalChemistry(ToxHubFinding from, String liquid) {
+    public SironaMapping clinicalFromLab(ToxHubFinding from, String liquid) {
         if (isEmpty(from.finding())) {
             return null;
         }
 
-        var preferredLookupTerms = new ArrayList<String>(3);
-        preferredLookupTerms.add(liquid + " " + from.finding() + " " + (isEmpty(from.observation()) ? "" : from.observation()));
-        preferredLookupTerms.add(from.finding() + " " + (isEmpty(from.observation()) ? "" : from.observation()));
-        for (String term : preferredLookupTerms) {
-            var guesses = lookup.lookup(term, Vocabularies.CLINICAL, null, false, 1, 5, "PT");
-            if (!guesses.isEmpty()) {
-                var to = guesses.stream().map(g -> new ToxHubFinding().finding(g)).toList();
-                return new SironaMapping(from, to);
-            }
+        var guesses = lookup.lookup(liquid + " " + from.finding() + " " + (isEmpty(from.observation()) ? "" : from.observation()), Vocabularies.CLINICAL, null, false, 1, 5, "PT");
+        if (!guesses.isEmpty()) {
+            var to = guesses.stream().map(g -> new ToxHubFinding().finding(g)).toList();
+            return new SironaMapping(from, to);
         }
+
+        var exact = conceptService.meddraByName(from.finding() + (isEmpty(from.observation()) ? "" : " " + from.observation()));
+        if (exact != null) {
+            return new SironaMapping(from, List.of(new ToxHubFinding().finding(exact.name())));
+        }
+
 
         var regularMapping = clinicalFromHistopathology(from);
         if (!isEmpty(from.observation()) && regularMapping != null && regularMapping.to() != null && regularMapping.to().stream().anyMatch(findingContainsObservations(from))) {
             var correctDirection = regularMapping.to().stream().filter(findingContainsObservations(from)).toList();
             return new SironaMapping(from, correctDirection);
-        } else {
+        } else if (regularMapping != null && regularMapping.to() != null && !regularMapping.to().isEmpty()) {
             return regularMapping;
+        } else {
+            var moreGuessing = lookup.lookup(from.finding() + (isEmpty(from.observation()) ? "" : " " + from.observation()), Vocabularies.CLINICAL, null, false, 1, 5, "PT");
+            var to = moreGuessing.stream().map(g -> new ToxHubFinding().finding(g)).toList();
+            return new SironaMapping(from, to);
         }
     }
 
@@ -177,8 +179,7 @@ public class SironaService {
         List<Mapping> result = emptyList();
         int i = 1;
         while (result.isEmpty() && i <= MAX_PENALTY) {
-            var voc = List.of(MEASUREMENT, OBSERVATION).contains(meddra.domain()) ? EnumSet.of(Vocabulary.Identifier.LABORATORY_TEST_NAME) : Vocabularies.ETOX;
-            var m = eToxMapping.map(meddra, voc, false, i);
+            var m = eToxMapping.map(meddra, ETOX, false, i);
             if (m.size() == 1 && m.stream().findAny().get().description().startsWith("No mappings available for ")) {
                 break;
             }

@@ -53,7 +53,6 @@ public class MappingService {
     public static final String VOCABULARY_ID = "vocabulary_id";
     public static final String DOMAIN_ID = "domain_id";
     public static final String CONCEPT_CLASS_ID = "concept_class_id";
-    public static final Set<Concept> BODY_STRUCTURES = Set.of(new Concept().id(40481827), new Concept().id(4034052), new Concept().id(4237366), new Concept().id(70002975), new Concept().id(70000004));
 
 
     private final ConceptRelationshipRepo relationshipRepo;

@@ -12,6 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -50,6 +51,21 @@ public class Mapping implements Serializable {
         return new Mapping()
                 .from(from)
                 .description("No mappings available for " + from.humanReadable());
+    }
+
+    // Return best positive mapping, if no positive mapping best negative, if no mappings emptyList
+    public static List<Mapping> bestMappings(Collection<Mapping> mappings) {
+        double bestScore = bestScore(mappings);
+        return mappings.stream()
+                .filter(r -> r.totalPenalty() == bestScore)
+                .toList();
+    }
+
+    // Return best positive mapping, if no positive mapping best negative, if no mappings 0
+    public static double bestScore(Collection<Mapping> mappings) {
+        return mappings.stream().anyMatch(r -> r.totalPenalty() >= 0) ?
+                mappings.stream().filter(r -> r.totalPenalty() >= 0).mapToDouble(Mapping::totalPenalty).min().orElse(0) :
+                mappings.stream().filter(r -> r.totalPenalty() <= 0).mapToDouble(Mapping::totalPenalty).max().orElse(0);
     }
 
 

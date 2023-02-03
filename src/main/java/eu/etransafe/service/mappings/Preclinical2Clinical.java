@@ -32,7 +32,6 @@ import static eu.etransafe.domain.Mapping.Direction.DOWNHILL;
 import static eu.etransafe.domain.Mapping.Direction.UPHILL;
 import static eu.etransafe.domain.Vocabularies.CLINICAL;
 import static eu.etransafe.domain.Vocabularies.INTERMEDIARY;
-import static eu.etransafe.service.mappings.MappingService.BODY_STRUCTURES;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.groupingBy;
@@ -44,8 +43,10 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @Service
 public class Preclinical2Clinical {
 
+    public static final Set<Concept> BODY_STRUCTURE = Set.of(new Concept().id(40481827), new Concept().id(4034052), new Concept().id(4237366), new Concept().id(70002975), new Concept().id(70000004));
     private final ConceptService conceptService;
     private final MappingService mappingService;
+
 
     public Preclinical2Clinical(ConceptService conceptService, MappingService mappingService) {
         this.conceptService = conceptService;
@@ -304,7 +305,7 @@ public class Preclinical2Clinical {
             if (initialSnomed.concepts().stream().noneMatch(c -> c.conceptClass().equals("Clinical Finding"))) {
                 Set<Concept> snomedCombinationConcepts = mapFromMultiple(initialSnomed, options, isLab);
                 Mapping preceding = precedingMapping(fromSourceToSnomed, initialSnomed);
-                var isBodyStructureMapping = initialSnomed.concepts().stream().anyMatch(BODY_STRUCTURES::contains);
+                var isBodyStructureMapping = initialSnomed.concepts().stream().anyMatch(BODY_STRUCTURE::contains);
                 for (Concept c : snomedCombinationConcepts) {
                     var extraSites = extraFindingSites(organs, c);
                     var penalty = extraSites.size();
