@@ -1,5 +1,6 @@
 package eu.etransafe.service.mappings;
 
+import eu.etransafe.domain.Concept;
 import eu.etransafe.domain.Mapping;
 import eu.etransafe.service.concepts.ConceptService;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,8 @@ import java.util.Set;
 import static eu.etransafe.domain.Vocabularies.CLINICAL;
 import static eu.etransafe.domain.Vocabularies.ETOX;
 import static eu.etransafe.domain.Vocabularies.SEND;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Slf4j
@@ -57,6 +60,43 @@ class Clinical2PreclinicalTest {
         var c = conceptService.byCode("10019847", CLINICAL);
         Set<Mapping> res = clinical2Preclinical.map(c, SEND, true, 3);
         res.stream().sorted(Comparator.comparing((Mapping m) -> Math.abs(m.totalPenalty()))).forEach(r -> System.out.println(r.explanationString()));
+    }
+
+    @Test
+    void mapPotentialEternalMapping() {
+        var c = conceptService.byCode("10081236", CLINICAL);
+        Set<Mapping> res = clinical2Preclinical.map(c, SEND, true, 2);
+        res.stream().sorted(Comparator.comparing((Mapping m) -> Math.abs(m.totalPenalty()))).forEach(r -> System.out.println(r.explanationString()));
+    }
+
+    @Test
+    void mapPotentialEternalMapping2() {
+        var c = conceptService.byCode("10058808", CLINICAL);
+        Set<Mapping> res = clinical2Preclinical.map(c, SEND, true, 2);
+        res.stream().sorted(Comparator.comparing((Mapping m) -> Math.abs(m.totalPenalty()))).forEach(r -> System.out.println(r.explanationString()));
+    }
+
+
+    @Test
+    void mapHepatitisShouldHaveLiverPlusInflammationAsOnlyPerfectMapping() {
+        var hepatitis = conceptService.byCode("10019717", CLINICAL);
+        Set<Mapping> results = clinical2Preclinical.map(hepatitis, SEND, true, 2);
+        var bestMapping = results.stream().filter(r -> r.totalPenalty() == 0).toList();
+        // one mapping
+        assertEquals(1, bestMapping.size());
+        // two concepts
+        assertEquals(2, bestMapping.get(0).toConcepts().size());
+        // liver and inflammation
+        assertTrue(bestMapping.get(0).toConcepts().stream().map(Concept::name).allMatch(n -> n.equalsIgnoreCase("liver") || n.equalsIgnoreCase("inflammation")));
+    }
+
+    @Test
+    void mapNecrotisingUlcerativeGingivostomatitisShouldHaveMappingToThreeConcepts() {
+        var necrotisingUlcerativeGingivostomatitis = conceptService.byCode("10055670", CLINICAL);
+        Set<Mapping> results = clinical2Preclinical.map(necrotisingUlcerativeGingivostomatitis, SEND, true, 2);
+        var bestMappings = Mapping.bestMappings(results);
+                                            // Contains three-way mapping
+        assertTrue(bestMappings.stream().anyMatch(m -> m.toConcepts().size() == 3));
     }
 
 

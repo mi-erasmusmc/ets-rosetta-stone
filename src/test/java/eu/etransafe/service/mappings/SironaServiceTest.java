@@ -36,7 +36,9 @@ class SironaServiceTest {
         var request = List.of(
                 new ToxHubFinding().finding("mineralization"),
                 new ToxHubFinding().finding("inflammation").organ("lung"),
-                new ToxHubFinding().finding("extramedullary hematopoiesis").organ("spleen")
+                new ToxHubFinding().finding("extramedullary hematopoiesis").organ("spleen"),
+                new ToxHubFinding().finding("ulceration").organ("skin")
+
         );
         controller.getHPATH2MeddraMapping(new SironaRequest().findings(request)).forEach(System.out::println);
     }
@@ -86,12 +88,15 @@ class SironaServiceTest {
     @Test
     void testClinicalChemistry() {
         var body = new SironaRequest().findings(List.of(
+                new ToxHubFinding().finding("Protein"),
+                new ToxHubFinding().finding("Leukocytes"),
                 new ToxHubFinding().finding("Cholesterol").observation("decreased"),
                 new ToxHubFinding().finding("Aspartate aminotransferase").observation("increased"),
                 new ToxHubFinding().finding("Calcium").observation("decreased"),
                 new ToxHubFinding().finding("Potassium"),
                 new ToxHubFinding().finding("Sodium"),
                 new ToxHubFinding().finding("Chloride"),
+                new ToxHubFinding().finding("Erythrocytes"),
                 new ToxHubFinding().finding("Gamma globulin").observation("increased")
         ));
         var resp = controller.getCC2MeddraMapping(body);

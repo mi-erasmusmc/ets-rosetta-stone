@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Comparator;
 
+import static eu.etransafe.domain.Vocabularies.ETOX;
 import static eu.etransafe.domain.Vocabularies.SEND;
 
 @SpringBootTest
@@ -59,6 +60,15 @@ class Preclinical2ClinicalTest {
     void testWildCombination() {
         var f = conceptService.byCode("C120889", SEND);
         var o = conceptService.byCode("C77669", SEND);
+        preclinical2Clinical.map(f, o, 2)
+                .forEach(m -> System.out.println(m.explanationString()));
+
+    }
+
+    @Test
+    void testStringsCausingProblems() {
+        var o = conceptService.byName("SKIN", SEND).stream().findAny().get();
+        var f = conceptService.byName("Ulceration", ETOX).stream().findAny().get();
         preclinical2Clinical.map(f, o, 2)
                 .forEach(m -> System.out.println(m.explanationString()));
 
