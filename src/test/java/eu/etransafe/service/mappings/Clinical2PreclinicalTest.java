@@ -27,6 +27,9 @@ class Clinical2PreclinicalTest {
     @Autowired
     ConceptService conceptService;
 
+    @Autowired
+    MappingService mappingService;
+
     @Test
     void mapComplex() {
         var c = conceptService.byCode("10031233", CLINICAL);
@@ -94,7 +97,7 @@ class Clinical2PreclinicalTest {
     void mapNecrotisingUlcerativeGingivostomatitisShouldHaveMappingToThreeConcepts() {
         var necrotisingUlcerativeGingivostomatitis = conceptService.byCode("10055670", CLINICAL);
         Set<Mapping> results = clinical2Preclinical.map(necrotisingUlcerativeGingivostomatitis, SEND, true, 2);
-        var bestMappings = Mapping.bestMappings(results);
+        var bestMappings = mappingService.bestMappings(results);
                                             // Contains three-way mapping
         assertTrue(bestMappings.stream().anyMatch(m -> m.toConcepts().size() == 3));
     }

@@ -299,7 +299,6 @@ public class Preclinical2Clinical {
 
     private Set<Mapping> templateMapping(Mapping fromSourceToSnomed, Map<Integer, Set<Integer>> options, boolean isLab) {
         Set<Mapping> results = new HashSet<>();
-        Set<Concept> organs = getToOrgans(fromSourceToSnomed);
         fromSourceToSnomed.to().forEach(initialSnomed -> {
             // Don't bother with template mapping if already included clinical findings, because that is what we are looking for :-)
             if (initialSnomed.concepts().stream().noneMatch(c -> c.conceptClass().equals("Clinical Finding"))) {
@@ -307,7 +306,7 @@ public class Preclinical2Clinical {
                 Mapping preceding = precedingMapping(fromSourceToSnomed, initialSnomed);
                 var isBodyStructureMapping = initialSnomed.concepts().stream().anyMatch(BODY_STRUCTURE::contains);
                 for (Concept c : snomedCombinationConcepts) {
-                    var extraSites = extraFindingSites(organs, c);
+                    var extraSites = extraFindingSites(fromSourceToSnomed.toConcepts(), c);
                     var penalty = extraSites.size();
                     var extraSitesExplanation = penalty == 0 ? "" :
                             ". Penalty for extra finding sites: " + extraSites.stream()
@@ -333,14 +332,6 @@ public class Preclinical2Clinical {
         return results;
     }
 
-    private Set<Concept> getToOrgans(Mapping fromSourceToSnomed) {
-        return fromSourceToSnomed.to()
-                .stream()
-                .map(MappingItem::concepts)
-                .flatMap(Collection::stream)
-                .filter(c -> c.domain().equals(SPEC_ANATOMIC_SITE))
-                .collect(toSet());
-    }
 
     private List<Concept> extraFindingSites(Set<Concept> organs, Concept c) {
         return conceptService.findingSites(c)

@@ -280,6 +280,21 @@ public class MappingService {
         }
     }
 
+    // Return best positive mapping, if no positive mapping best negative, if no mappings emptyList
+    public List<Mapping> bestMappings(Collection<Mapping> mappings) {
+        double bestScore = bestScore(mappings);
+        return mappings.stream()
+                .filter(r -> r.totalPenalty() == bestScore)
+                .toList();
+    }
+
+    // Return best positive mapping score, if no positive mapping best negative, if no mappings 0
+    public double bestScore(Collection<Mapping> mappings) {
+        return mappings.stream().anyMatch(r -> r.totalPenalty() >= 0) ?
+                mappings.stream().filter(r -> r.totalPenalty() >= 0).mapToDouble(Mapping::totalPenalty).min().orElse(0) :
+                mappings.stream().filter(r -> r.totalPenalty() <= 0).mapToDouble(Mapping::totalPenalty).max().orElse(0);
+    }
+
     @Cacheable(value = "snomedOptions")
     public Set<Integer> findMappingOptionsSnomed(int id) {
         var options = relationshipRepo.findPotentialCombinationPartners(id,
