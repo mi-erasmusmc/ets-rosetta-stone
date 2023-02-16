@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.EnumSet;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static eu.etransafe.domain.Vocabularies.CLINICAL;
 import static eu.etransafe.domain.Vocabularies.INTERMEDIARY;
@@ -34,7 +36,8 @@ public class VocabulariesController {
             case PRECLINICAL -> PRECLINICAL;
             case CLINICAL -> CLINICAL;
             case INTERMEDIARY -> INTERMEDIARY;
-            case ALL -> EnumSet.allOf(Vocabulary.Identifier.class);
+            case ALL ->
+                    Stream.of(PRECLINICAL, CLINICAL, INTERMEDIARY).flatMap(Collection::stream).collect(Collectors.toSet());
         };
         return repo.findByIds(vocabularies);
     }

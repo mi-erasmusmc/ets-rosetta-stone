@@ -1,5 +1,6 @@
 package eu.etransafe.domain;
 
+import eu.etransafe.exception.RosettaException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -58,7 +59,8 @@ public class ConceptRelationship {
         HAS_DISPOSITION("Has Disposition"),
         DISPOSITION_OF("Disposition of"),
         HAS_COMPONENT("Has component"),
-        RELATED("Related match");
+        RELATED("Related match"),
+        OTHER("Other");
 
         private final String value;
 
@@ -68,6 +70,16 @@ public class ConceptRelationship {
 
         public String value() {
             return this.value;
+        }
+
+        @Override
+        public <E extends Enum<E> & CDMEnum<E>> E other(Class<E> type) {
+            var other = OTHER;
+            if (type.isInstance(other)) {
+                return type.cast(other);
+            } else {
+                throw new RosettaException("This should not happen");
+            }
         }
     }
 

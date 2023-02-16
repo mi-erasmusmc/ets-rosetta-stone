@@ -1,6 +1,7 @@
 package eu.etransafe.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.etransafe.exception.RosettaException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -68,7 +69,8 @@ public class Vocabulary {
         HPATH("HPATH"),
         NON_NEOPLASTIC_FINDING("Non-Neoplastic Findi"),
         NEOPLASM_TYPE("Neoplasm Type"),
-        LABORATORY_TEST_NAME("Laboratory Test Name");
+        LABORATORY_TEST_NAME("Laboratory Test Name"),
+        OTHER("Other");
 
         private final String value;
 
@@ -86,6 +88,17 @@ public class Vocabulary {
         public String value() {
             return this.value;
         }
+
+        @Override
+        public <E extends Enum<E> & CDMEnum<E>> E other(Class<E> type) {
+            var other = OTHER;
+            if (type.isInstance(other)) {
+                return type.cast(other);
+            } else {
+                throw new RosettaException("This should not happen");
+            }
+        }
     }
+
 }
 

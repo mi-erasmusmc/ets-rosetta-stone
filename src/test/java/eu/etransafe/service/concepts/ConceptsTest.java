@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.EnumSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -49,6 +50,14 @@ class ConceptsTest {
     void testNormalizeHepaticFibrosisMedDRA() {
         var response = conceptService.normalize("Hepatic Fibrosis", EnumSet.of(Vocabulary.Identifier.MEDDRA), false);
         assertEquals(1, response.size());
+    }
+
+    @Test
+    void testNormalizeDeath() {
+        var response = conceptService.normalize("Death", null, false);
+        response.forEach(d -> System.out.println(d.string()));
+        assertFalse(response.isEmpty());
+        assertTrue(response.stream().allMatch(c -> c.name().equalsIgnoreCase("Death")));
     }
 
 }

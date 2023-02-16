@@ -1,5 +1,7 @@
 package eu.etransafe.domain;
 
+import eu.etransafe.exception.RosettaException;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +38,7 @@ public enum Domain implements CDMEnum<Domain> {
     SPONSOR("Sponsor"),
     TYPE_CONCEPT("Type Concept"),
     UNIT("Unit"),
+    OTHER("Other"),
     VISIT("Visit");
 
 
@@ -61,5 +64,15 @@ public enum Domain implements CDMEnum<Domain> {
 
     public String value() {
         return this.value;
+    }
+
+    @Override
+    public <E extends Enum<E> & CDMEnum<E>> E other(Class<E> type) {
+        var other = OTHER;
+        if (type.isInstance(other)) {
+            return type.cast(other);
+        } else {
+            throw new RosettaException("This should not happen");
+        }
     }
 }

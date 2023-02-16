@@ -35,8 +35,8 @@ class VocabulariesControllerTest {
     void testAllVocabularies() {
         var all = controller.getVocabularies(Vocabulary.Type.ALL);
         System.out.println(all);
-        Assertions.assertEquals(EnumSet.allOf(Vocabulary.Identifier.class).size(), all.size());
+        // 'ILO' and 'Other' are not returned, that is why -2
+        Assertions.assertEquals(EnumSet.allOf(Vocabulary.Identifier.class).size() - 2, all.size());
     }
-
-
+    
 }

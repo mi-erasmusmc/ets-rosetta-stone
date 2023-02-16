@@ -256,6 +256,49 @@ class GenerateData {
         }
     }
 
+    @Test
+    @Disabled
+    void createLAB2PTOverview() {
+        // file with list of most combinations in eTox database
+        String excelFile = USER_DIR + "/lb_send.tsv";
+        List<String[]> terms = new ArrayList<>();
+        try (InputStream is = new FileInputStream(excelFile);
+             BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(TAB);
+                terms.add(values);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        File file = new File("lab2pt.tsv");
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
+            terms.sort(Comparator.comparing((String[] arr) -> Double.valueOf(arr[2])).reversed());
+            DecimalFormat df = new DecimalFormat("#.#");
+
+            for (String[] t : terms) {
+                final var finding = conceptService.byCode(t[0], PRECLINICAL);
+                if (finding != null) {
+                    final var res = preclinical2Clinical.map(finding, null,2);
+                    final double bestScore = mappingService.bestScore(res);
+                    final String bestMappings = res.stream()
+                            .filter(r -> r.totalPenalty() == bestScore)
+                            .map(Mapping::to)
+                            .flatMap(Collection::stream)
+                            .map(MappingItem::humanReadableSimple)
+                            .collect(Collectors.joining(" | "));
+                    final String line = t[2] + TAB + finding.code() + TAB + finding.name() + TAB + df.format(bestScore) + TAB + bestMappings;
+                    bw.write(line);
+                    bw.newLine();
+                    System.out.println(line);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private List<Concept> pts() {
         return conceptService.byClass("PT");
     }
