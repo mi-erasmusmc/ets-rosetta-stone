@@ -260,7 +260,7 @@ class GenerateData {
     @Disabled
     void createLAB2PTOverview() {
         // file with list of most combinations in eTox database
-        String excelFile = USER_DIR + "/lb_send.tsv";
+        String excelFile = USER_DIR + "/eToxCC.tsv";
         List<String[]> terms = new ArrayList<>();
         try (InputStream is = new FileInputStream(excelFile);
              BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
@@ -272,13 +272,13 @@ class GenerateData {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        File file = new File("lab2pt.tsv");
+        File file = new File("labetox2pt.tsv");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            terms.sort(Comparator.comparing((String[] arr) -> Double.valueOf(arr[2])).reversed());
+//            terms.sort(Comparator.comparing((String[] arr) -> Double.valueOf(arr[2])).reversed());
             DecimalFormat df = new DecimalFormat("#.#");
 
             for (String[] t : terms) {
-                final var finding = conceptService.byCode(t[0], PRECLINICAL);
+                final var finding = conceptService.byName(t[0], Set.of(Vocabulary.Identifier.LABORATORY_TEST_NAME)).stream().findAny().orElse(null);
                 if (finding != null) {
                     final var res = preclinical2Clinical.map(finding, null,2);
                     final double bestScore = mappingService.bestScore(res);
@@ -288,7 +288,7 @@ class GenerateData {
                             .flatMap(Collection::stream)
                             .map(MappingItem::humanReadableSimple)
                             .collect(Collectors.joining(" | "));
-                    final String line = t[2] + TAB + finding.code() + TAB + finding.name() + TAB + df.format(bestScore) + TAB + bestMappings;
+                    final String line = finding.code() + TAB + finding.name() + TAB + df.format(bestScore) + TAB + bestMappings;
                     bw.write(line);
                     bw.newLine();
                     System.out.println(line);
