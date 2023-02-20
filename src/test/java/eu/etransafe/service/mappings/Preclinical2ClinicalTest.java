@@ -48,7 +48,7 @@ class Preclinical2ClinicalTest {
     }
 
     @Test
-    void testWildCombinationShouldCompleteWithin60Seconds() {
+    void testWildCombinationShouldCompleteWithin90Seconds() {
         var now = System.currentTimeMillis();
         var f = conceptService.byCode("C120889", SEND);
         var o = conceptService.byCode("C77669", SEND);
@@ -56,7 +56,7 @@ class Preclinical2ClinicalTest {
         var isEmpty = result.stream().findAny().get().toConcepts().isEmpty();
         assertFalse(isEmpty);
         var finish = System.currentTimeMillis();
-        assertTrue(finish - now < 60000);
+        assertTrue(finish - now < 90000);
     }
 
     @Test

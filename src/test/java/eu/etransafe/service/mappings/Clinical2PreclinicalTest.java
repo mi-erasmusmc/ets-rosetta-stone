@@ -15,6 +15,7 @@ import static eu.etransafe.domain.Vocabularies.CLINICAL;
 import static eu.etransafe.domain.Vocabularies.ETOX;
 import static eu.etransafe.domain.Vocabularies.SEND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -34,7 +35,9 @@ class Clinical2PreclinicalTest {
     void mapComplex() {
         var c = conceptService.byCode("10031233", CLINICAL);
         var res = clinical2Preclinical.map(c, ETOX, false, 1);
-        res.forEach(r -> System.out.println(r.explanationString()));
+        var best = mappingService.bestMappings(res);
+        assertFalse(best.isEmpty());
+        assertTrue(best.get(0).totalPenalty() < 1);
     }
 
     @Test
@@ -48,7 +51,9 @@ class Clinical2PreclinicalTest {
     void mapLabTest() {
         var c = conceptService.byCode("10001546", CLINICAL);
         var res = clinical2Preclinical.map(c, SEND, true, 1);
-        res.forEach(r -> System.out.println(r.explanationString()));
+        var best = mappingService.bestMappings(res);
+        assertFalse(best.isEmpty());
+        assertTrue(best.get(0).totalPenalty() < 1);
     }
 
     @Test
@@ -98,7 +103,7 @@ class Clinical2PreclinicalTest {
         var necrotisingUlcerativeGingivostomatitis = conceptService.byCode("10055670", CLINICAL);
         Set<Mapping> results = clinical2Preclinical.map(necrotisingUlcerativeGingivostomatitis, SEND, true, 2);
         var bestMappings = mappingService.bestMappings(results);
-                                            // Contains three-way mapping
+        // Contains three-way mapping
         assertTrue(bestMappings.stream().anyMatch(m -> m.toConcepts().size() == 3));
     }
 
@@ -108,7 +113,6 @@ class Clinical2PreclinicalTest {
         Set<Mapping> res = clinical2Preclinical.map(c, SEND, true, 2);
         res.stream().sorted(Comparator.comparing((Mapping m) -> Math.abs(m.totalPenalty()))).forEach(r -> System.out.println(r.explanationString()));
     }
-    
 
 
 }

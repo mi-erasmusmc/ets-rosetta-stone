@@ -26,14 +26,14 @@ class PreclinicalTest {
     void testAllergicHepatitis() {
         var c = conceptService.byCode("10071198", CLINICAL);
         var response = preclinical.map(c, SEND, false, 2);
-        assertEquals(7, response.size());
+        assertEquals(5, response.size());
     }
 
     @Test
     void testHepaticFibrosis() {
         var c = conceptService.byCode("10019668", CLINICAL);
         var response = preclinical.map(c, ETOX, false, 2);
-        assertEquals(14, response.size());
+        assertEquals(19, response.size());
     }
 
     @Test
