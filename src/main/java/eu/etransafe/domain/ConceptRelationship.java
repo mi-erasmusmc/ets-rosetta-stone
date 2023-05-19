@@ -60,7 +60,8 @@ public class ConceptRelationship {
         DISPOSITION_OF("Disposition of"),
         HAS_COMPONENT("Has component"),
         RELATED("Related match"),
-        OTHER("Other");
+        OTHER("Other"),
+        IS_A_PRIMARY("Is a primary");
 
         private final String value;
 

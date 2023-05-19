@@ -271,7 +271,7 @@ public class MappingService {
     }
 
     public Concept mapPrimaryParent(Concept concept) {
-        var parents = relationshipRepo.primaryParent(concept);
+        var parents = relationshipRepo.primaryParent(concept, IS_A_PRIMARY);
         if (parents.size() == 1) {
             return parents.get(0);
         } else {

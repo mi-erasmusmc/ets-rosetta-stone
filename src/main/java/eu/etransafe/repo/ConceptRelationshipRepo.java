@@ -38,9 +38,9 @@ public interface ConceptRelationshipRepo extends JpaRepository<ConceptRelationsh
             FROM ConceptRelationship cr
             WHERE cr.conceptOne.vocabulary IN :from
             AND cr.conceptTwo.vocabulary IN :to
-            AND cr.relationshipId = "Maps to"
+            AND cr.relationshipId = :mapsTo
             """)
-    List<ConceptRelationship> findAllMappingsFromTo(Set<Vocabulary.Identifier> from, Set<Vocabulary.Identifier> to);
+    List<ConceptRelationship> findAllMappingsFromTo(Set<Vocabulary.Identifier> from, Set<Vocabulary.Identifier> to, ConceptRelationship.Identifier mapsTo);
 
     @Query(value = """
             SELECT cr
@@ -55,9 +55,9 @@ public interface ConceptRelationshipRepo extends JpaRepository<ConceptRelationsh
             SELECT DISTINCT cr.conceptTwo
             FROM   ConceptRelationship cr
             WHERE cr.conceptOne = :child
-            AND cr.relationshipId = 'Is a primary'
+            AND cr.relationshipId = :primary
             """)
-    List<Concept> primaryParent(Concept child);
+    List<Concept> primaryParent(Concept child, ConceptRelationship.Identifier primary);
 
     @Query(value = """
             SELECT DISTINCT cr2.conceptOne.id

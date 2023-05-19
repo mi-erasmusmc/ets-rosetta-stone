@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static eu.etransafe.domain.ConceptRelationship.Identifier.EXACT;
+import static eu.etransafe.domain.ConceptRelationship.Identifier.MAPS_TO;
 import static eu.etransafe.domain.Vocabularies.CLINICAL;
 import static eu.etransafe.domain.Vocabularies.ETOX;
 import static eu.etransafe.domain.Vocabularies.INTERMEDIARY;
@@ -134,7 +135,7 @@ public class MappingCache {
 
     @PostConstruct
     private synchronized void loadMedDRAToSnomed() {
-        relationshipRepo.findAllMappingsFromTo(CLINICAL, INTERMEDIARY)
+        relationshipRepo.findAllMappingsFromTo(CLINICAL, INTERMEDIARY, MAPS_TO)
                 .forEach(mapping -> {
                     var source = mapping.source() == null || mapping.source().isBlank() ? "Athena" : mapping.source();
                     var key = mapping.conceptOne().code();
