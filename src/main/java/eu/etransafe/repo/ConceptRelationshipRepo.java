@@ -63,8 +63,8 @@ public interface ConceptRelationshipRepo extends JpaRepository<ConceptRelationsh
             SELECT DISTINCT cr2.conceptOne.id
             FROM ConceptRelationship cr1
             JOIN ConceptRelationship cr2
+            ON cr1.conceptTwo = cr2.conceptTwo
             WHERE cr1.conceptOne.id = :conceptId
-            AND cr2.conceptTwo = cr1.conceptTwo
             AND cr1.relationshipId IN :relations
             AND cr2.relationshipId IN :relations
             """)
