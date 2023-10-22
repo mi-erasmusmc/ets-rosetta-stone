@@ -14,8 +14,8 @@ project.**
 
 - The eTransafe Rosetta Stone database, it can be created
   with [this code](https://github.com/mi-erasmusmc/ets-rosetta-stone-database)
-- [Java 17+]("https://www.oracle.com/java/technologies/downloads/")
-- Maven 3.8
+- [Java 21+]("https://adoptium.net/")
+- Maven 3.9
 
 ### HOW TO USE
 
