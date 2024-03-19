@@ -18,6 +18,8 @@ public interface ConceptRelationshipRepo extends JpaRepository<ConceptRelationsh
     @Query(value = """
             SELECT DISTINCT cr
             FROM ConceptRelationship cr
+            JOIN FETCH cr.conceptOne conceptOne
+            JOIN FETCH cr.conceptTwo conceptTwo
             WHERE cr.conceptOne IN :concepts
             AND cr.relationshipId IN :relationships
             AND cr.conceptTwo.domain IN :domains
@@ -29,6 +31,8 @@ public interface ConceptRelationshipRepo extends JpaRepository<ConceptRelationsh
     @Query(value = """
             SELECT DISTINCT cr
             FROM ConceptRelationship cr
+            JOIN FETCH cr.conceptOne conceptOne
+            JOIN FETCH cr.conceptTwo conceptTwo
             WHERE cr.conceptTwo.vocabulary IN :vocabularies
             """)
     List<ConceptRelationship> findAllMappingsTo(Set<Vocabulary.Identifier> vocabularies);
@@ -36,6 +40,8 @@ public interface ConceptRelationshipRepo extends JpaRepository<ConceptRelationsh
     @Query(value = """
             SELECT DISTINCT cr
             FROM ConceptRelationship cr
+            JOIN FETCH cr.conceptOne conceptOne
+            JOIN FETCH cr.conceptTwo conceptTwo
             WHERE cr.conceptOne.vocabulary IN :from
             AND cr.conceptTwo.vocabulary IN :to
             AND cr.relationshipId = :mapsTo
@@ -45,6 +51,8 @@ public interface ConceptRelationshipRepo extends JpaRepository<ConceptRelationsh
     @Query(value = """
             SELECT cr
             FROM ConceptRelationship cr
+            JOIN FETCH cr.conceptOne conceptOne
+            JOIN FETCH cr.conceptTwo conceptTwo
             WHERE cr.conceptOne in :concept
             AND cr.conceptTwo.vocabulary IN :vocabularies
             """)

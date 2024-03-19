@@ -2,7 +2,6 @@ package eu.etransafe.domain;
 
 import eu.etransafe.exception.RosettaException;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,10 +17,10 @@ public class ConceptRelationship {
 
     @Id
     Integer id;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "concept_id_1")
     Concept conceptOne;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "concept_id_2")
     Concept conceptTwo;
     String invalidReason;
