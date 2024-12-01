@@ -1,4 +1,4 @@
-FROM maven:3.9.8-eclipse-temurin-21-alpine AS BUILDER
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS BUILDER
 
 WORKDIR /builder
 
@@ -10,7 +10,7 @@ COPY src/main ./src/main
 RUN mvn package -DskipTests
 
 
-FROM eclipse-temurin:21.0.3_9-jre-alpine
+FROM eclipse-temurin:21.0.5_11-jre-alpine
 
 
 RUN adduser -D service -S -g "First"
