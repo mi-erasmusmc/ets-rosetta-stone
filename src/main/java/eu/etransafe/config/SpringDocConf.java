@@ -1,7 +1,6 @@
 package eu.etransafe.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.models.media.Schema;
@@ -17,10 +16,7 @@ import java.util.TreeMap;
         info = @Info(title = "eTransafe Rosetta Stone API",
                 description = "The eTransafe Rosetta Stone facilitates lookup of terms and translations between terminologies",
                 version = "2.3.0",
-                license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0"),
-                contact = @Contact(name = "Rowan Parry",
-                        email = "r.parry@erasmusmc.nl",
-                        url = "https://biosemantics.erasmusmc.nl/")))
+                license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0")))
 @Configuration
 public class SpringDocConf {
 
