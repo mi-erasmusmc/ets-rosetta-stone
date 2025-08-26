@@ -55,7 +55,10 @@ The Dockerfile in this repo runs the eTransafe Rosetta Stone in an Alpine contai
 
 ### PUBLICATION
 
-We are in the final stages of completing a publication about the eTransafe Rosetta Stone detailing its workings.
+van Mulligen, E.M., Parry, R., van der Lei, J. et al. 
+Mapping between clinical and preclinical terminologies: eTRANSAFE’s Rosetta stone approach. 
+J Biomed Semant 16, 15 (2025). 
+(https://doi.org/10.1186/s13326-025-00337-2)
 
 ### CONTRIBUTIONS
 
